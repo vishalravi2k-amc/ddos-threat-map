@@ -1,16 +1,15 @@
 import asyncio
 import json
 import random
+from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi import Request
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
 CITIES = [
     {"city": "New York", "lat": 40.7128, "lng": -74.0060},
@@ -44,7 +43,8 @@ manager = ConnectionManager()
 
 @app.get("/", response_class=HTMLResponse)
 async def get_index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    html_content = Path("templates/index.html").read_text()
+    return HTMLResponse(content=html_content)
 
 @app.websocket("/ws/attacks")
 async def websocket_endpoint(websocket: WebSocket):
