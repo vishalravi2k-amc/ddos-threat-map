@@ -1,28 +1,21 @@
 import asyncio
 import json
 import random
-from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi import Request
 
 app = FastAPI()
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 CITIES = [
     {"city": "New York", "lat": 40.7128, "lng": -74.0060},
     {"city": "London", "lat": 51.5074, "lng": -0.1278},
     {"city": "Tokyo", "lat": 35.6762, "lng": 139.6503},
     {"city": "Frankfurt", "lat": 50.1109, "lng": 8.6821},
-    {"city": "Singapore", "lat": 1.3521, "lng": 103.8198},
-    {"city": "São Paulo", "lat": -23.5505, "lng": -46.6333},
     {"city": "Sydney", "lat": -33.8688, "lng": 151.2093},
-    {"city": "Mumbai", "lat": 19.0760, "lng": 72.8777},
+    {"city": "São Paulo", "lat": -23.5505, "lng": -46.6333},
 ]
 
-ATTACK_TYPES = ["SYN Flood", "UDP Amplification", "HTTP DDoS", "DNS Flood"]
+ATTACK_TYPES = ["DDoS Flood", "SYN Flood", "UDP Amplification", "HTTP Botnet"]
 
 class ConnectionManager:
     def __init__(self):
@@ -42,9 +35,12 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 @app.get("/", response_class=HTMLResponse)
-async def get_index(request: Request):
-    html_content = Path("templates/index.html").read_text()
-    return HTMLResponse(content=html_content)
+async def get_index():
+    try:
+        with open("templates/index.html", "r", encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError:
+        return "<h1>Template not found. Check your templates/index.html path.</h1>"
 
 @app.websocket("/ws/attacks")
 async def websocket_endpoint(websocket: WebSocket):
